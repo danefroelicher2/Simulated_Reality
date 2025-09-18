@@ -5,12 +5,12 @@ import json
 
 
 class OllamaClient:
-    def __init__(self, model: str = "llama3.2:3b", host: str = "http://localhost:11434"):
+    def __init__(self, model: str = "gemma3:4b", host: str = "http://localhost:11434"):
         """
         Initialize Ollama client for character conversations.
 
         Args:
-            model: The Ollama model to use (default: llama3.2:3b)
+            model: The Ollama model to use (default: gemma3:4b)
             host: Ollama server host (default: localhost:11434)
         """
         self.model = model
@@ -22,7 +22,28 @@ class OllamaClient:
         """Check if Ollama server is accessible and model is available."""
         try:
             models = self.client.list()
-            available_models = [model['name'] for model in models['models']]
+            # Handle different possible model response formats
+            if 'models' in models:
+                available_models = []
+                for model in models['models']:
+                    if isinstance(model, dict):
+                        if 'name' in model:
+                            available_models.append(model['name'])
+                        elif 'model' in model:
+                            available_models.append(model['model'])
+                    else:
+                        # Handle model objects with 'model' attribute
+                        model_str = str(model)
+                        if "model='" in model_str:
+                            # Extract model name from the string representation
+                            start = model_str.find("model='") + 7
+                            end = model_str.find("'", start)
+                            if end > start:
+                                available_models.append(model_str[start:end])
+                        else:
+                            available_models.append(model_str)
+            else:
+                available_models = []
 
             if self.model not in available_models:
                 print(f"Warning: Model '{self.model}' not found. Available models: {available_models}")

@@ -61,7 +61,7 @@ class CharacterChatInterface:
             if not ollama_client.check_connection():
                 print("[ERROR] Cannot connect to Ollama server.")
                 print("Please make sure Ollama is running on localhost:11434")
-                print("and you have a model available (e.g., llama3.2:3b)")
+                print("and you have a model available (e.g., gemma3:4b)")
                 return False
 
             self.conversation_manager = ConversationManager(ollama_client)

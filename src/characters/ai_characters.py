@@ -1,5 +1,5 @@
 from .base_character import BaseCharacter, PersonalityTraits
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 import random
 
 
@@ -64,6 +64,9 @@ class DeepSeaResearcher(BaseCharacter):
         ]
 
         self.location = "research_station"
+
+        # Conversation capability
+        self.conversation_manager = None  # Will be set by external system
 
     def get_possible_actions(self, world) -> List[str]:
         base_actions = super().get_possible_actions(world)
@@ -157,6 +160,34 @@ class DeepSeaResearcher(BaseCharacter):
             "preferred_location": "research_station"
         }
 
+    def set_conversation_manager(self, conversation_manager):
+        """Set the conversation manager for this character."""
+        self.conversation_manager = conversation_manager
+
+    def respond_to(self, user_input: str, context: str = "") -> Dict[str, Any]:
+        """Generate a conversational response as Dr. Marina Depth."""
+        if not self.conversation_manager:
+            return {
+                "response": "I'm sorry, I can't have conversations right now. My communication system isn't set up.",
+                "success": False,
+                "error": "No conversation manager available"
+            }
+
+        return self.conversation_manager.have_conversation(
+            character=self,
+            user_input=user_input,
+            conversation_context=context
+        )
+
+    def remember_experience(self, experience: str, importance: int = 6) -> bool:
+        """Add a specific experience to the character's memory."""
+        if self.conversation_manager:
+            return self.conversation_manager.inject_experience(self, experience, importance)
+        else:
+            # Fallback to direct memory storage
+            self.add_memory(experience, importance)
+            return True
+
 
 class ERSurgeon(BaseCharacter):
     def __init__(
@@ -221,6 +252,9 @@ class ERSurgeon(BaseCharacter):
         ]
 
         self.location = "hospital"
+
+        # Conversation capability
+        self.conversation_manager = None  # Will be set by external system
 
     def get_possible_actions(self, world) -> List[str]:
         base_actions = super().get_possible_actions(world)
@@ -324,3 +358,31 @@ class ERSurgeon(BaseCharacter):
             "medical_skills": self.skills,
             "preferred_location": "hospital"
         }
+
+    def set_conversation_manager(self, conversation_manager):
+        """Set the conversation manager for this character."""
+        self.conversation_manager = conversation_manager
+
+    def respond_to(self, user_input: str, context: str = "") -> Dict[str, Any]:
+        """Generate a conversational response as Dr. Alex Healer."""
+        if not self.conversation_manager:
+            return {
+                "response": "I'm sorry, I can't have conversations right now. My communication system isn't set up.",
+                "success": False,
+                "error": "No conversation manager available"
+            }
+
+        return self.conversation_manager.have_conversation(
+            character=self,
+            user_input=user_input,
+            conversation_context=context
+        )
+
+    def remember_experience(self, experience: str, importance: int = 6) -> bool:
+        """Add a specific experience to the character's memory."""
+        if self.conversation_manager:
+            return self.conversation_manager.inject_experience(self, experience, importance)
+        else:
+            # Fallback to direct memory storage
+            self.add_memory(experience, importance)
+            return True
